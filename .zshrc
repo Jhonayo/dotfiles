@@ -244,6 +244,7 @@ fsearch-all() {
     fi
     grep -r --color=always -n "$1" . | fzf --ansi --height 60% --reverse --border
 }
+export PATH="$HOME/.local/bin:$PATH"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
