@@ -252,3 +252,6 @@ export NVM_DIR="$HOME/.nvm"
 export ANDROID_HOME=$HOME/android-sdk
 export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 export PATH=$ANDROID_HOME/platform-tools:$PATH
+
+# opencode
+export PATH=/home/jhonayo/.opencode/bin:$PATH
