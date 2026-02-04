@@ -1,35 +1,49 @@
--- Pull in the wezterm API
 local wezterm = require("wezterm")
-
--- This will hold the configuration.
 local config = wezterm.config_builder()
 
--- local constans = require("constants")
-
+-- Importar módulos
+local constants = require("constants")
 local commands = require("commands")
+local keys = require("lua.keys")
+local workspaces = require("lua.workspaces")
+local status = require("lua.status")
+local resurrect = require("lua.resurrect")
+--local appearance = require("lua.appearance")
 
--- FUENTE: Mantener tu fuente Meslo que ya funciona con Powerlevel10k
+-- Aplicar configuraciones de módulos
+config.keys = keys.setup()
+status.setup()
+workspaces.setup()
+--appearance.apply_to_config(config)
+
+-- CONFIGURACIÓN DEL MULTIPLEXOR (Servidor)
+config.unix_domains = {
+	{ name = "unix" },
+}
+config.default_gui_startup_args = { "connect", "unix" }
+
+-- FUENTE
 config.font = wezterm.font("MesloLGS Nerd Font Mono", { weight = "Light" })
 config.font_size = 12
---config.window_background_image = constans.bg_image
 
--- PESTAÑAS: Habilitar barra de pestañas (era false en tu config)
+-- FONDO
+-- config.window_background_image = constants.bg_image
+
+-- PESTAÑAS
 config.enable_tab_bar = true
-config.hide_tab_bar_if_only_one_tab = true
-config.use_fancy_tab_bar = true
-config.tab_bar_at_bottom = false
+config.hide_tab_bar_if_only_one_tab = false
+config.use_fancy_tab_bar = false
+config.tab_bar_at_bottom = true
 
--- VENTANA: Mejorar decoraciones
+-- VENTANA
 config.window_decorations = "TITLE | RESIZE"
--- config.window_background_opacity = 0.8
 
---Paleta de comandos
-
+-- Paleta de comandos
 wezterm.on("augment-command-palette", function()
 	return commands
 end)
 
--- PADDING: Agregar espacio interior
+-- PADDING
 config.window_padding = {
 	left = 8,
 	right = 8,
@@ -37,55 +51,15 @@ config.window_padding = {
 	bottom = 8,
 }
 
--- ATAJOS DE TECLADO: Lo más importante que te faltaba
-config.keys = {
-	-- Nueva pestaña
-	{ key = "t", mods = "CTRL|SHIFT", action = wezterm.action.SpawnTab("CurrentPaneDomain") },
-	-- Cerrar pestaña
-	{ key = "w", mods = "CTRL|SHIFT", action = wezterm.action.CloseCurrentTab({ confirm = true }) },
-	-- Cambiar entre pestañas
-	{ key = "Tab", mods = "CTRL", action = wezterm.action.ActivateTabRelative(1) },
-	{ key = "Tab", mods = "CTRL|SHIFT", action = wezterm.action.ActivateTabRelative(-1) },
-	-- Navegación directa por número de pestaña
-	{ key = "1", mods = "ALT", action = wezterm.action.ActivateTab(0) },
-	{ key = "2", mods = "ALT", action = wezterm.action.ActivateTab(1) },
-	{ key = "3", mods = "ALT", action = wezterm.action.ActivateTab(2) },
-	{ key = "4", mods = "ALT", action = wezterm.action.ActivateTab(3) },
-	{ key = "5", mods = "ALT", action = wezterm.action.ActivateTab(4) },
-
-	-- Dividir paneles
-	{ key = "H", mods = "CTRL|SHIFT", action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
-	{ key = "D", mods = "CTRL|SHIFT", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
-
-	-- Cerrar panel actual
-	{ key = "x", mods = "CTRL|SHIFT", action = wezterm.action.CloseCurrentPane({ confirm = true }) },
-
-	-- Cerrar panel sin confirmación (más rápido)
-	{ key = "X", mods = "CTRL|SHIFT", action = wezterm.action.CloseCurrentPane({ confirm = false }) },
-
-	-- Navegar entre paneles
-	{ key = "LeftArrow", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Left") },
-	{ key = "RightArrow", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Right") },
-	{ key = "UpArrow", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Up") },
-	{ key = "DownArrow", mods = "CTRL|SHIFT", action = wezterm.action.ActivatePaneDirection("Down") },
-	-- Redimensionar paneles
-	{ key = "LeftArrow", mods = "CTRL|SUPER", action = wezterm.action.AdjustPaneSize({ "Left", 3 }) },
-	{ key = "RightArrow", mods = "CTRL|SUPER", action = wezterm.action.AdjustPaneSize({ "Right", 3 }) },
-	{ key = "UpArrow", mods = "CTRL|SUPER", action = wezterm.action.AdjustPaneSize({ "Up", 3 }) },
-	{ key = "DownArrow", mods = "CTRL|SUPER", action = wezterm.action.AdjustPaneSize({ "Down", 3 }) },
-	-- Zoom en panel
-	{ key = "z", mods = "CTRL|SHIFT", action = wezterm.action.TogglePaneZoomState },
-}
-
--- SCROLLBACK: Más líneas de historial
+-- SCROLLBACK
 config.scrollback_lines = 5000
 
--- TU COLOR SCHEME: Mantener tu tema personalizado "coolnight"
+-- COLOR SCHEME
 config.colors = {
 	foreground = "#CBE0F0",
 	background = "#011423",
-	cursor_bg = "white", --"#47FF9C",
-	cursor_border = "white", --"#47FF9C",
+	cursor_bg = "white",
+	cursor_border = "white",
 	cursor_fg = "#011423",
 	selection_bg = "#033259",
 	selection_fg = "#CBE0F0",
@@ -111,9 +85,11 @@ config.colors = {
 	},
 }
 
--- RENDIMIENTO: Configuración adicional para mejor performance
+-- RENDIMIENTO
 config.front_end = "WebGpu"
 config.webgpu_power_preference = "HighPerformance"
 
--- and finally, return the configuration to wezterm
+-- RESURRECT_WEZTERM
+resurrect.setup(config)
+
 return config

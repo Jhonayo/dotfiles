@@ -255,3 +255,4 @@ export PATH=$ANDROID_HOME/platform-tools:$PATH
 
 # opencode
 export PATH=/home/jhonayo/.opencode/bin:$PATH
+export PATH="$PATH:$HOME/.pub-cache/bin"
