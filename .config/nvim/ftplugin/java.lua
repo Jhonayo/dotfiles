@@ -1,0 +1,164 @@
+local home = os.getenv("HOME")
+local jdtls = require("jdtls")
+
+-- Nombre del proyecto basado en el directorio actual
+local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+local workspace_dir = home .. "/.cache/nvim/jdtls/" .. project_name
+
+-- ============================================================
+-- BUNDLES CONFIGURATION (siguiendo documentación oficial)
+-- ============================================================
+
+-- 1. Primero agregamos java-debug
+local bundles = {
+  vim.fn.glob(home .. "/.local/share/nvim/mason/share/java-debug-adapter/com.microsoft.java.debug.plugin.jar", true),
+}
+
+-- 2. Luego agregamos java-test EXCLUYENDO los JARs problemáticos
+local java_test_path = home .. "/.local/share/nvim/mason/share/java-test/*.jar"
+local java_test_bundles = vim.split(vim.fn.glob(java_test_path, true), "\n")
+
+local excluded = {
+  "com.microsoft.java.test.runner-jar-with-dependencies.jar",
+  "jacocoagent.jar",
+}
+
+for _, bundle in ipairs(java_test_bundles) do
+  local filename = vim.fn.fnamemodify(bundle, ":t")
+  if not vim.tbl_contains(excluded, filename) and bundle ~= "" then
+    table.insert(bundles, bundle)
+  end
+end
+
+-- 3. Capacidades para Blink y Snacks
+local capabilities = require("blink.cmp").get_lsp_capabilities()
+local extendedClientCapabilities = jdtls.extendedClientCapabilities
+extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
+
+-- Configuración principal
+local config = {
+  cmd = {
+    home .. "/.sdkman/candidates/java/21.0.8-tem/bin/java",
+    "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+    "-Dosgi.bundles.defaultStartLevel=4",
+    "-Declipse.product=org.eclipse.jdt.ls.core.product",
+    "-Dlog.protocol=true",
+    "-Dlog.level=ALL",
+    "-Xmx1g",
+    "--add-modules=ALL-SYSTEM",
+    "--add-opens",
+    "java.base/java.util=ALL-UNNAMED",
+    "--add-opens",
+    "java.base/java.lang=ALL-UNNAMED",
+    "-javaagent:" .. home .. "/.local/share/nvim/mason/share/jdtls/lombok.jar",
+    "-jar",
+    vim.fn.glob(home .. "/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar"),
+    "-configuration",
+    home .. "/.local/share/nvim/mason/packages/jdtls/config_linux",
+    "-data",
+    workspace_dir,
+  },
+
+  root_dir = vim.fs.root(0, { "gradlew", ".git", "mvnw", "pom.xml", "build.gradle" }),
+
+  settings = {
+    java = {
+      home = home .. "/.sdkman/candidates/java/21.0.8-tem",
+      eclipse = {
+        downloadSources = true,
+      },
+      configuration = {
+        updateBuildConfiguration = "interactive",
+        runtimes = {
+          {
+            name = "JavaSE-17",
+            path = home .. "/.sdkman/candidates/java/17.0.16-tem",
+          },
+          {
+            name = "JavaSE-21",
+            path = home .. "/.sdkman/candidates/java/21.0.8-tem",
+            default = true,
+          },
+        },
+      },
+      maven = {
+        downloadSources = true,
+      },
+      implementationsCodeLens = {
+        enabled = true,
+      },
+      referencesCodeLens = {
+        enabled = true,
+      },
+      references = {
+        includeDecompiledSources = true,
+      },
+      signatureHelp = { enabled = true },
+      format = {
+        enabled = true,
+      },
+      inlayHints = {
+        parameterNames = {
+          enabled = "all",
+        },
+      },
+    },
+  },
+
+  init_options = {
+    bundles = bundles,
+    extendedClientCapabilities = extendedClientCapabilities,
+  },
+
+  on_attach = function(client, bufnr)
+    -- Verificar que nvim-dap está disponible antes de configurarlo
+    local dap_ok, dap = pcall(require, "dap")
+    if dap_ok then
+      jdtls.setup_dap({ hotcodereplace = "auto" })
+      require("jdtls.dap").setup_dap_main_class_configs()
+    else
+      vim.notify("nvim-dap not available, skipping DAP setup", vim.log.levels.WARN)
+    end
+
+    -- Keymaps
+    local opts = { buffer = bufnr, silent = true }
+
+    -- Testing (solo si DAP está disponible)
+    if dap_ok then
+      vim.keymap.set("n", "<leader>tc", function()
+        require("jdtls.dap").test_class()
+      end, vim.tbl_extend("force", opts, { desc = "Test Class" }))
+
+      vim.keymap.set("n", "<leader>tm", function()
+        require("jdtls.dap").test_nearest_method()
+      end, vim.tbl_extend("force", opts, { desc = "Test Method" }))
+    end
+
+    -- Refactoring (siempre disponible)
+    vim.keymap.set("n", "<leader>co", function()
+      jdtls.organize_imports()
+    end, vim.tbl_extend("force", opts, { desc = "Organize Imports" }))
+
+    vim.keymap.set("n", "<leader>crv", function()
+      jdtls.extract_variable()
+    end, vim.tbl_extend("force", opts, { desc = "Extract Variable" }))
+
+    vim.keymap.set("v", "<leader>crv", function()
+      jdtls.extract_variable(true)
+    end, vim.tbl_extend("force", opts, { desc = "Extract Variable" }))
+
+    vim.keymap.set("n", "<leader>crc", function()
+      jdtls.extract_constant()
+    end, vim.tbl_extend("force", opts, { desc = "Extract Constant" }))
+
+    vim.keymap.set("v", "<leader>crc", function()
+      jdtls.extract_constant(true)
+    end, vim.tbl_extend("force", opts, { desc = "Extract Constant" }))
+
+    vim.keymap.set("v", "<leader>crm", function()
+      jdtls.extract_method(true)
+    end, vim.tbl_extend("force", opts, { desc = "Extract Method" }))
+  end,
+}
+
+jdtls.start_or_attach(config)
