@@ -6,7 +6,6 @@ function M.apply_to_config(config)
 	config.color_scheme = "Tokyo Night" -- Usamos el esquema nativo para consistencia
 	config.font = wezterm.font("JetBrains Mono Nerd Font")
 	config.font_size = 11.0
-
 	-- Hacer que el menú se vea como un "Float" de Neovim
 	config.command_palette_bg_color = "#16161e"
 	config.command_palette_fg_color = "#c0caf5"
