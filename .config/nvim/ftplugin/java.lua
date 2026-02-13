@@ -160,6 +160,7 @@ local config = {
     if wk_ok then
       wk.add({
         { "<leader>cT", group = "Test" },
+        { "<leader>ce", group = "Extract", buffer = bufnr },
       })
     end
     if dap_ok then
@@ -190,28 +191,26 @@ local config = {
       end, vim.tbl_extend("force", opts, { desc = "Debug Test Method (Full UI)" }))
     end
 
-    -- Refactoring (siempre disponible)
-    vim.keymap.set("n", "<leader>co", function()
-      jdtls.organize_imports()
-    end, vim.tbl_extend("force", opts, { desc = "Organize Imports" }))
-
-    vim.keymap.set("n", "<leader>crv", function()
+    -- ============================================================
+    -- JDTLS: Refactoring (Extract)
+    -- ============================================================
+    vim.keymap.set("n", "<leader>cev", function() -- ← crv -> cev
       jdtls.extract_variable()
     end, vim.tbl_extend("force", opts, { desc = "Extract Variable" }))
 
-    vim.keymap.set("v", "<leader>crv", function()
+    vim.keymap.set("v", "<leader>cev", function()
       jdtls.extract_variable(true)
     end, vim.tbl_extend("force", opts, { desc = "Extract Variable" }))
 
-    vim.keymap.set("n", "<leader>crc", function()
+    vim.keymap.set("n", "<leader>cec", function() -- ← crc -> cec
       jdtls.extract_constant()
     end, vim.tbl_extend("force", opts, { desc = "Extract Constant" }))
 
-    vim.keymap.set("v", "<leader>crc", function()
+    vim.keymap.set("v", "<leader>cec", function()
       jdtls.extract_constant(true)
     end, vim.tbl_extend("force", opts, { desc = "Extract Constant" }))
 
-    vim.keymap.set("v", "<leader>crm", function()
+    vim.keymap.set("v", "<leader>cem", function() -- ← crm -> cem
       jdtls.extract_method(true)
     end, vim.tbl_extend("force", opts, { desc = "Extract Method" }))
   end,
