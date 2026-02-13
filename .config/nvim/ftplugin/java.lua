@@ -123,6 +123,34 @@ local config = {
     -- Keymaps
     local opts = { buffer = bufnr, silent = true }
 
+    -- ============================================================
+    -- DAP: Ejecutar directamente la 3ra configuración (main class)
+    -- ============================================================
+    if dap_ok then
+      -- Ejecutar Main Class con layout 2
+      vim.keymap.set("n", "<leader>cR", function()
+        local configs = dap.configurations.java
+        if configs and configs[3] then
+          dap.run(configs[3])
+          require("dapui").open({ layout = 2 })
+        else
+          dap.continue()
+          require("dapui").open({ layout = 2 })
+        end
+      end, vim.tbl_extend("force", opts, { desc = "Launch Main Class" }))
+
+      -- Toggle dapui (minimizar/maximizar)
+      vim.keymap.set("n", "<leader>cx", function()
+        require("dapui").toggle({ layout = 2 })
+      end, vim.tbl_extend("force", opts, { desc = "Min / Max Run Console" }))
+
+      -- Terminar debug y cerrar UI
+      vim.keymap.set("n", "<leader>cX", function()
+        dap.terminate()
+        require("dapui").close()
+      end, vim.tbl_extend("force", opts, { desc = "Terminate Run Console" }))
+    end
+
     -- Testing (solo si DAP está disponible)
     if dap_ok then
       vim.keymap.set("n", "<leader>tc", function()

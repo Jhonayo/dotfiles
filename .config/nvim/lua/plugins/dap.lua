@@ -11,15 +11,15 @@ return {
           local dapui = require("dapui")
           dapui.setup(opts)
 
-          dap.listeners.after.event_initialized["dapui_config"] = function()
-            dapui.open()
-          end
-          dap.listeners.before.event_terminated["dapui_config"] = function()
-            dapui.close()
-          end
-          dap.listeners.before.event_exited["dapui_config"] = function()
-            dapui.close()
-          end
+          --dap.listeners.after.event_initialized["dapui_config"] = function()
+          --  dapui.open()
+          --end
+          --dap.listeners.before.event_terminated["dapui_config"] = function()
+          --  dapui.close()
+          --end
+          --dap.listeners.before.event_exited["dapui_config"] = function()
+          --  dapui.close()
+          --end
         end,
       },
     },
@@ -92,6 +92,29 @@ return {
           require("dap").repl.open()
         end,
         desc = "Open REPL",
+      },
+      {
+        "<leader>dx",
+        function()
+          require("dapui").toggle()
+        end,
+        desc = "Min / Max Dap",
+      },
+      {
+        "<leader>dt",
+        function()
+          require("dap").terminate()
+          require("dapui").close()
+        end,
+        desc = "Terminate Dap",
+      },
+      {
+        "<leader>dj",
+        function()
+          require("dap").continue()
+          require("dapui").open({ layout = 2 })
+        end,
+        desc = "Run Java Class",
       },
     },
   },
