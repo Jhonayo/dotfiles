@@ -119,9 +119,23 @@ local config = {
     else
       vim.notify("nvim-dap not available, skipping DAP setup", vim.log.levels.WARN)
     end
-
-    -- Keymaps
+    -- ============================================================
+    -- Keymaps para Java (DAP, Testing, Refactoring, etc.)
+    -- ============================================================
     local opts = { buffer = bufnr, silent = true }
+
+    -- Registrar grupo de Test en which-key
+    local wk_ok, wk = pcall(require, "which-key")
+    if wk_ok then
+      wk.add({
+        { "<leader>cT", group = "Test" },
+        { "<leader>ce", group = "Extract", buffer = bufnr },
+      })
+    end
+
+    -- ============================================================
+    -- DAP: Debug & Run
+    -- ============================================================
 
     -- ============================================================
     -- DAP: Ejecutar directamente la 3ra configuración (main class)
@@ -151,18 +165,9 @@ local config = {
       end, vim.tbl_extend("force", opts, { desc = "Terminate Run Console" }))
     end
 
-    -- Testing (solo si DAP está disponible)
-    --
-    --
-    --
-    -- Registrar grupo de Test en which-key
-    local wk_ok, wk = pcall(require, "which-key")
-    if wk_ok then
-      wk.add({
-        { "<leader>cT", group = "Test" },
-        { "<leader>ce", group = "Extract", buffer = bufnr },
-      })
-    end
+    -- ============================================================
+    -- DAP: Testing
+    -- ============================================================
     if dap_ok then
       -- ============================================================
       -- Test SIN debug (solo Console - layout 2)
@@ -190,6 +195,16 @@ local config = {
         require("dapui").open() -- Sin especificar layout = abre todo
       end, vim.tbl_extend("force", opts, { desc = "Debug Test Method (Full UI)" }))
     end
+    -- ============================================================
+    -- JDTLS: Project Management
+    -- ============================================================
+    vim.keymap.set("n", "<leader>co", function()
+      jdtls.organize_imports()
+    end, vim.tbl_extend("force", opts, { desc = "Organize Imports" }))
+
+    vim.keymap.set("n", "<leader>cu", function()
+      jdtls.update_projects_config()
+    end, vim.tbl_extend("force", opts, { desc = "Update Project Config" }))
 
     -- ============================================================
     -- JDTLS: Refactoring (Extract)
