@@ -152,14 +152,42 @@ local config = {
     end
 
     -- Testing (solo si DAP está disponible)
+    --
+    --
+    --
+    -- Registrar grupo de Test en which-key
+    local wk_ok, wk = pcall(require, "which-key")
+    if wk_ok then
+      wk.add({
+        { "<leader>cT", group = "Test" },
+      })
+    end
     if dap_ok then
-      vim.keymap.set("n", "<leader>tc", function()
+      -- ============================================================
+      -- Test SIN debug (solo Console - layout 2)
+      -- ============================================================
+      vim.keymap.set("n", "<leader>cTc", function()
         require("jdtls.dap").test_class()
-      end, vim.tbl_extend("force", opts, { desc = "Test Class" }))
+        require("dapui").open({ layout = 2 })
+      end, vim.tbl_extend("force", opts, { desc = "Test Class (Console)" }))
 
-      vim.keymap.set("n", "<leader>tm", function()
+      vim.keymap.set("n", "<leader>cTm", function()
         require("jdtls.dap").test_nearest_method()
-      end, vim.tbl_extend("force", opts, { desc = "Test Method" }))
+        require("dapui").open({ layout = 2 })
+      end, vim.tbl_extend("force", opts, { desc = "Test Method (Console)" }))
+
+      -- ============================================================
+      -- Test CON debug (UI completa - ambos layouts)
+      -- ============================================================
+      vim.keymap.set("n", "<leader>cTC", function()
+        require("jdtls.dap").test_class()
+        require("dapui").open() -- Sin especificar layout = abre todo
+      end, vim.tbl_extend("force", opts, { desc = "Debug Test Class (Full UI)" }))
+
+      vim.keymap.set("n", "<leader>cTM", function()
+        require("jdtls.dap").test_nearest_method()
+        require("dapui").open() -- Sin especificar layout = abre todo
+      end, vim.tbl_extend("force", opts, { desc = "Debug Test Method (Full UI)" }))
     end
 
     -- Refactoring (siempre disponible)
