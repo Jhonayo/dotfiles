@@ -232,3 +232,77 @@ local config = {
 }
 
 jdtls.start_or_attach(config)
+
+-- ============================================================
+-- JAVA FILE CREATOR: Módulo para crear y gestionar archivos Java
+-- ============================================================
+-- Carga el módulo personalizado que permite crear clases, interfaces,
+-- enums y records, además de mover archivos entre packages
+local java_creator = require("java.creator")
+
+-- ============================================================
+-- COMANDOS: Creación de archivos Java
+-- ============================================================
+-- Comando :JavaCreate [tipo]
+-- Sin argumentos: Muestra menú interactivo para seleccionar tipo
+-- Con argumento: Crea directamente el tipo especificado
+-- Ejemplos:
+--   :JavaCreate           → Muestra menú
+--   :JavaCreate class     → Crea una clase directamente
+--   :JavaCreate interface → Crea una interfaz directamente
+vim.api.nvim_create_user_command("JavaCreate", function(opts)
+  if opts.args == "" then
+    java_creator.create_menu()
+  else
+    java_creator.create_java_item(opts.args)
+  end
+end, {
+  nargs = "?",
+  complete = function()
+    return { "class", "interface", "enum", "record" }
+  end,
+  desc = "Crear nuevo archivo Java (Class/Interface/Enum/Record)",
+})
+
+-- ============================================================
+-- COMANDOS: Refactoring de archivos Java
+-- ============================================================
+-- Comando :JavaMove
+-- Mueve la clase actual a otro package, actualizando la declaración
+-- del package automáticamente. Los imports en otros archivos deben
+-- actualizarse manualmente usando diagnósticos y code actions.
+vim.api.nvim_create_user_command("JavaMove", function()
+  java_creator.move_to_package()
+end, {
+  desc = "Mover clase actual a otro package",
+})
+
+-- ============================================================
+-- KEYMAPS: Creación de archivos Java
+-- ============================================================
+-- <leader>cN - Crear nuevo archivo Java (menú interactivo)
+-- Muestra un selector con opciones: Class, Interface, Enum, Record
+-- Solicita el package (sugiere el actual) y el nombre del archivo
+-- Crea el archivo en la ubicación correcta con el package declarado
+vim.keymap.set("n", "<leader>cN", function()
+  require("java.creator").create_menu()
+end, { buffer = bufnr, desc = "New Java Class/Interface/Enum/Record" })
+
+-- ============================================================
+-- KEYMAPS: Refactoring de archivos Java
+-- ============================================================
+-- <leader>cM - Mover clase a otro package y mostrar diagnósticos
+-- Workflow:
+--   1. Solicita el nuevo package (sugiere el actual)
+--   2. Mueve el archivo y actualiza la declaración del package
+--   3. Abre automáticamente Trouble con diagnósticos del buffer
+--   4. Permite arreglar imports rotos usando code actions (<leader>ca)
+-- Nota: Los imports en otros archivos NO se actualizan automáticamente,
+--       usa los diagnósticos para identificar y corregir referencias rotas
+vim.keymap.set("n", "<leader>cM", function()
+  require("java.creator").move_to_package()
+  -- Esperar a que el archivo se mueva antes de mostrar diagnósticos
+  vim.defer_fn(function()
+    vim.cmd("Trouble diagnostics toggle filter.buf=0")
+  end, 500)
+end, { buffer = bufnr, desc = "Move to Package & Show Diagnostics" })
