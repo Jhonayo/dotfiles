@@ -1,0 +1,10 @@
+[user]
+	name = jhonayo
+	email = j.iramirezpavez@gmail.com
+	username = Jhonayo
+[init]
+	defaultBranch = main
+[core]
+	excludesfile = /home/jhonayo/.config/git/.gitignore_global
+	autocrlf = input
+	eol = lf

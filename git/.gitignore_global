@@ -1,0 +1,45 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*~
+*.bak
+*.orig
+
+# Logs
+*.log
+logs/
+
+# Dependencies (comunes)
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs (comunes)
+dist/
+build/
+*.tgz
+*.tar.gz
